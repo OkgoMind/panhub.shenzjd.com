@@ -16,8 +16,6 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
-      # 可选：设置热搜密码
-      - HOT_SEARCH_PASSWORD=admin123
       # 可选：设置日志级别
       - LOG_LEVEL=info
     # 健康检查

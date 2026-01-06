@@ -334,17 +334,11 @@ export class HotSearchSQLiteService {
   }
 
   /**
-   * 清除所有热搜记录（需要密码验证）
+   * 清除所有热搜记录（仅用于测试）
    */
-  async clearHotSearches(password: string): Promise<{ success: boolean; message: string }> {
+  async clearHotSearches(): Promise<{ success: boolean; message: string }> {
     await this.waitForInit();
     if (!this.db) return { success: false, message: '数据库未初始化' };
-
-    const correctPassword = process.env.HOT_SEARCH_PASSWORD || 'admin123';
-
-    if (password !== correctPassword) {
-      return { success: false, message: '密码错误' };
-    }
 
     try {
       const stmt = this.db.prepare('DELETE FROM hot_searches');
@@ -357,24 +351,18 @@ export class HotSearchSQLiteService {
   }
 
   /**
-   * 删除指定热搜词
+   * 删除指定热搜词（仅用于测试）
    */
-  async deleteHotSearch(term: string, password: string): Promise<{ success: boolean; message: string }> {
+  async deleteHotSearch(term: string): Promise<{ success: boolean; message: string }> {
     await this.waitForInit();
     if (!this.db) return { success: false, message: '数据库未初始化' };
-
-    const correctPassword = process.env.HOT_SEARCH_PASSWORD || 'admin123';
-
-    if (password !== correctPassword) {
-      return { success: false, message: '密码错误' };
-    }
 
     try {
       const stmt = this.db.prepare('DELETE FROM hot_searches WHERE term = ?');
       const result = stmt.run(term);
 
       if (result.changes > 0) {
-        return { success: true, message: `热搜词 \"${term}\" 已删除` };
+        return { success: true, message: `热搜词 "${term}" 已删除` };
       } else {
         return { success: false, message: '热搜词不存在' };
       }

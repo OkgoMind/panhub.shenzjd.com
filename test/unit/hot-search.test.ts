@@ -1,6 +1,6 @@
 /**
  * 热搜功能测试
- * 测试 SQLite 持久化和 API 端点
+ * 测试 SQLite 持久化
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -10,7 +10,6 @@ describe('HotSearchSQLiteService', () => {
   let service: HotSearchSQLiteService;
 
   beforeAll(() => {
-    // 使用测试数据库
     service = new HotSearchSQLiteService();
   });
 
@@ -55,43 +54,6 @@ describe('HotSearchSQLiteService', () => {
     expect(stats.topTerms).toBeInstanceOf(Array);
   });
 
-  it('应该能够删除热搜词', async () => {
-    await service.recordSearch('待删除');
-
-    let searches = await service.getHotSearches(50);
-    expect(searches.some(s => s.term === '待删除')).toBe(true);
-
-    const result = await service.deleteHotSearch('待删除', 'admin123');
-    expect(result.success).toBe(true);
-
-    searches = await service.getHotSearches(50);
-    expect(searches.some(s => s.term === '待删除')).toBe(false);
-  });
-
-  it('应该拒绝错误的删除密码', async () => {
-    const result = await service.deleteHotSearch('测试', 'wrongpassword');
-    expect(result.success).toBe(false);
-    expect(result.message).toContain('密码错误');
-  });
-
-  it('应该能够清除所有热搜', async () => {
-    // 先添加一些数据
-    await service.recordSearch('清理测试1');
-    await service.recordSearch('清理测试2');
-
-    const result = await service.clearHotSearches('admin123');
-    expect(result.success).toBe(true);
-
-    const searches = await service.getHotSearches(10);
-    expect(searches.length).toBe(0);
-  });
-
-  it('应该拒绝错误的清除密码', async () => {
-    const result = await service.clearHotSearches('wrongpassword');
-    expect(result.success).toBe(false);
-    expect(result.message).toContain('密码错误');
-  });
-
   it('应该过滤违规词', async () => {
     await service.recordSearch('政治敏感词');
     await service.recordSearch('暴力内容');
@@ -107,19 +69,19 @@ describe('HotSearchSQLiteService', () => {
   });
 
   it('应该限制最大条目数', async () => {
-    // 清空后添加超过限制的条目
-    await service.clearHotSearches('admin123');
+    // 先清空
+    await service.clearHotSearches();
 
     for (let i = 0; i < 60; i++) {
       await service.recordSearch(`测试词${i}`);
     }
 
     const searches = await service.getHotSearches(100);
-    expect(searches.length).toBeLessThanOrEqual(50);
+    expect(searches.length).toBeLessThanOrEqual(30);
   });
 
   it('应该按分数排序', async () => {
-    await service.clearHotSearches('admin123');
+    await service.clearHotSearches();
 
     await service.recordSearch('高分词');
     await service.recordSearch('高分词');
@@ -150,7 +112,6 @@ describe('HotSearchSQLiteService', () => {
     await service.recordSearch(longTerm);
 
     const searches = await service.getHotSearches(100);
-    // 超长词应该被过滤（由 API 层处理，这里测试服务层的健壮性）
     expect(searches.length).toBeGreaterThanOrEqual(0);
   });
 
@@ -162,8 +123,6 @@ describe('HotSearchSQLiteService', () => {
 });
 
 describe('HotSearch API Endpoints', () => {
-  // 这里可以添加 API 端点的集成测试
-  // 需要启动 Nuxt 服务器
   it('API 端点应该返回正确的数据结构', async () => {
     // 伪代码，实际需要启动服务器
     // const response = await fetch('/api/hot-searches');

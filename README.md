@@ -25,7 +25,6 @@ docker run --name panhub -p 3000:3000 -d ghcr.io/wu529778790/panhub.shenzjd.com:
 mkdir -p /root/panhub/data
 docker run -d --name panhub -p 3000:3000 \
   -v /root/panhub/data:/app/data \
-  -e HOT_SEARCH_PASSWORD=admin123 \
   ghcr.io/wu529778790/panhub.shenzjd.com:latest
 ```
 
@@ -118,7 +117,6 @@ pnpm test:coverage           # 测试覆盖率
 
 | 变量名 | 默认值 | 说明 |
 |--------|--------|------|
-| `HOT_SEARCH_PASSWORD` | `admin123` | 热搜管理密码 |
 | `LOG_LEVEL` | `info` | 日志级别 |
 | `NITRO_PRESET` | auto-detect | 部署预设 |
 | `PORT` | `3000` | 服务端口 |
